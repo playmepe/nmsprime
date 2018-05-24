@@ -57,6 +57,16 @@ class Handler extends ExceptionHandler {
 			/* return redirect(route('Auth.login'))->with('message', 'You page session expired. Please try again'); */
 		}
 
+		// Validation: global in-model-validation exception
+		if ($e instanceof \Watson\Validating\ValidationException)
+		{
+			\Log::info ('Validation Rule Error: '.$e->getErrors());
+
+			$msg = 'Input invalid – please correct the following errors';
+			\Session::push('tmp_error_above_form', $msg);
+			return \Redirect::back()->withErrors($e)->withInput()->with('message', $msg)->with('message_color', 'danger');
+		}
+
 		return parent::render($request, $e);
 	}
 

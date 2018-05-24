@@ -546,6 +546,10 @@ class BaseController extends Controller {
 
 	/**
 	 * Generic store function - stores an object of the calling model
+	 *
+	 * NOTE: - validation is in model context - BaseModel
+	 *       - validation execptions are handled in app\Exceptions\Handler.php
+	 *
 	 * @param redirect: if set to false returns id of the new created object (default: true)
 	 * @return: html redirection to edit page (or if param $redirect is false the new added object id)
 	 */
@@ -556,19 +560,13 @@ class BaseController extends Controller {
 
 		// Prepare and Validate Input
 		$data 		= $controller->prepare_input(Input::all());
-		$rules 		= $controller->prepare_rules($obj::rules(), $data);
-		$validator  = Validator::make($data, $rules);
-		$data 		= $controller->prepare_input_post_validation ($data);
+		$obj->rules = $controller->prepare_rules($obj::rules(), $data);
 
-		if ($validator->fails()) {
-			Log::info ('Validation Rule Error: '.$validator->errors());
-
-			$msg = 'Input invalid – please correct the following errors';
-			\Session::push('tmp_error_above_form', $msg);
-			return Redirect::back()->withErrors($validator)->withInput()->with('message', $msg)->with('message_color', 'danger');
-		}
-
-		$obj = $obj::create($data);
+		// create the new model
+		$obj = $obj->create();
+		$obj->fill($data);
+		$obj->saveOrFail(); // with validation
+		$obj->update ($controller->prepare_input_post_validation($data));
 
 		// Add N:M Relations
 		$this->_set_many_to_many_relations($obj, $data);
