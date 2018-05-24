@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\{ SoftDeletes, Model as Eloquent};
 class BaseModel extends Eloquent
 {
 	use SoftDeletes;
+	use \Watson\Validating\ValidatingTrait;
 
 	// use to enable force delete for inherit models
 	protected $force_delete = 0;
@@ -67,6 +68,10 @@ class BaseModel extends Eloquent
 		// set helper variables
 		$this->voip_enabled = $this->voip_enabled();
 		$this->billing_enabled = $this->billing_enabled();
+
+		// init: global validation for in-model-validation
+		// See: ValidatingTrait package
+		$this->rules = $this->rules($this->id);
 	}
 
 
@@ -110,6 +115,13 @@ class BaseModel extends Eloquent
 	{
 		return [];
 	}
+
+
+	/* rules array for global in-model-validation - see ValidatingTrait
+	 * @note: dont use this directly! Instead use rules() function
+	 * @author Torsten Schmidt
+	 */
+	protected $rules = [];
 
 
 	function set_index_delete_disabled()
