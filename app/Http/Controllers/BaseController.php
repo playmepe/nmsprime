@@ -560,7 +560,7 @@ class BaseController extends Controller {
 
 		// Prepare and Validate Input
 		$data 		= $controller->prepare_input(Input::all());
-		$obj->rules = $controller->prepare_rules($obj::rules(), $data);
+		$obj->set_validation ($controller->prepare_rules($obj::rules(), $data));
 
 		// create the new model
 		$obj = $obj->create();
@@ -645,18 +645,8 @@ class BaseController extends Controller {
 		$controller = static::get_controller_obj();
 
 		// Prepare and Validate Input
-		$data      = $controller->prepare_input(Input::all());
-		$rules     = $controller->prepare_rules($obj::rules($id), $data);
-		$validator = Validator::make($data, $rules);
-		$data      = $controller->prepare_input_post_validation ($data);
-
-		if ($validator->fails()) {
-			Log::info ('Validation Rule Error: '.$validator->errors());
-
-			$msg = 'Input invalid – please correct the following errors';
-			\Session::push('tmp_error_above_form', $msg);
-			return Redirect::back()->withErrors($validator)->withInput()->with('message', $msg)->with('message_color', 'danger');
-		}
+		$data       = $controller->prepare_input(Input::all());
+		$obj->set_validation ($controller->prepare_rules($obj::rules($id), $data));
 
 		// update timestamp, this forces to run all observer's
 		// Note: calling touch() forces a direct save() which calls all observers before we update $data
@@ -667,7 +657,10 @@ class BaseController extends Controller {
 		// The Update
 		// Note: Eloquent Update requires updated_at to either be in the fillable array or to have a guarded field
 		//       without updated_at field. So we globally use a guarded field from now, to use the update timestamp
-		$obj->update($data);
+		$obj->fill($data);
+		$obj->saveOrFail();
+
+		$data      = $controller->prepare_input_post_validation ($data);
 
 		// Add N:M Relations
 		$this->_set_many_to_many_relations($obj, $data);

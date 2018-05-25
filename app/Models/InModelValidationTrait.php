@@ -22,4 +22,10 @@ trait InModelValidationTrait {
 		$this->rules = $this->rules($this->id);
 	}
 
+
+	public function set_validation($data)
+	{
+		$this->rules = $data;
+	}
+
 }
