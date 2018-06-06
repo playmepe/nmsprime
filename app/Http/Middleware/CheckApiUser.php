@@ -34,7 +34,7 @@ class CheckApiUser {
 	{
 		// only user api@localhost is allowed
 		if ($request->getUser() !== 'api@localhost')
-			return response()->json(['ret' => 'unauthorized']);
+			return response()->json(['ret' => 'unauthorized'], 401);
 
 		return $next($request);
 	}
