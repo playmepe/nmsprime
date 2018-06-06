@@ -34,6 +34,10 @@ class RoutesAuthTest extends TestCase {
 		'Home',
 	];
 
+	// there now is an API with own routes – add all available API versions here
+	protected $api_versions = [
+		0,
+	];
 
 
 	/**
@@ -70,6 +74,7 @@ class RoutesAuthTest extends TestCase {
 		$routeCollection = Route::getRoutes();
 		foreach ($routeCollection as $value) {
 			$name = $value->getName();
+			$method = $value->getMethods()[0];
 
 			// no name – no test
 			if (!boolval($name))
@@ -83,24 +88,62 @@ class RoutesAuthTest extends TestCase {
 			if (in_array($name, $this->problematic_routes_to_check))
 				continue;
 
-			$_ = URL::route($value->getName(), [1, 1, 1, 1, 1], true);
-			$url = explode('?', $_)[0];
-			$method = $value->getMethods()[0];
-
-			if (in_array($name, $this->routes_redirecting_to_login_page)) {
-				// special test for redirects to login page
-				echo "\nTesting $name ($method: $url)";
-				$this->visit($url)
-					->see('Username')
-					->see('Password')
-					->see('Sign me in');
+			// check type of route
+			if (strpos($name, '.api_') !== false) {
+				$route_type = 'api';
 			}
 			else {
-				// all other routes should return 403 if not logged in
-				echo "\nTesting $name ($method: $url)";
-				$this->call($method, $url, []);
-				$this->assertResponseStatus(403);
-				$this->see('denied');
+				$route_type = 'standard';
+			}
+
+			// check if standard or API route
+			$urls = [];
+			if ($route_type == 'standard') {
+				$_ = URL::route($name, [1, 1, 1, 1, 1], true);
+				$urls[0] = explode('?', $_)[0];
+			}
+			elseif ($route_type == 'api') {
+				foreach ($this->api_versions as $api_version) {
+					$_ = URL::route($name, [$api_version, 1, 1, 1, 1], true);
+					$url = explode('?', $_)[0];
+					array_push($urls, $url);
+				}
+			}
+			else {
+				// impossible: add a test that fails
+				$this->assertContains($route_type, ['standard', 'api']);
+			}
+
+			foreach ($urls as $url) {
+				if (in_array($name, $this->routes_redirecting_to_login_page)) {
+					// special test for redirects to login page
+					echo "\nTesting $name ($method: $url)";
+					$this->visit($url)
+						->see('Username')
+						->see('Password')
+						->see('Sign me in');
+				}
+				elseif ($route_type == 'standard') {
+					// all other standard routes should return 403 if not logged in
+					echo "\nTesting $name ($method: $url)";
+					$this->call($method, $url, []);
+					$this->assertResponseStatus(403);
+					$this->see('denied');
+				}
+				elseif ($route_type == 'api') {
+					// api routes return 401!
+					echo "\nTesting $name ($method: $url)";
+					if (in_array($method, ['GET', ])) {
+						$this->call($method, $url, []);
+						$this->assertResponseStatus(401);
+						$this->see('Invalid credentials.');
+					}
+					else {
+						$this->call($method, $url, []);
+						$this->assertResponseStatus(403);
+						$this->see('denied');
+					}
+				}
 			}
 		}
 
