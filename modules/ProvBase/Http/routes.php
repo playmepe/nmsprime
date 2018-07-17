@@ -8,6 +8,8 @@ BaseRoute::group([], function() {
 	BaseRoute::get('modem/{modem}/log', array ('as' => 'Modem.log', 'uses' => 'Modules\ProvBase\Http\Controllers\ModemController@log'));
 	BaseRoute::get('modem/{modem}/lease', array ('as' => 'Modem.lease', 'uses' => 'Modules\ProvBase\Http\Controllers\ModemController@lease'));
 
+	BaseRoute::get('modem/firmware', array ('as' => 'Modem.firmware', 'uses' => 'Modules\ProvBase\Http\Controllers\ModemController@sw_rev_view'));
+
 	// Core Routes
 	BaseRoute::resource('Modem', 'Modules\ProvBase\Http\Controllers\ModemController');
 	BaseRoute::resource('Cmts', 'Modules\ProvBase\Http\Controllers\CmtsController');

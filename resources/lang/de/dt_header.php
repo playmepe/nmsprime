@@ -116,6 +116,7 @@ return [
 	'modem.id' => 'Nummer',
 	'modem.house_number' => 'Hausnr',
 	'modem.mac' => 'MAC Adresse',
+	'modem.sw_rev' => 'Firmware Version',
 	'modem.name' => 'Modemname',
 	'modem.lastname' => 'Nachname',
 	'modem.firstname' => 'Vorname',
@@ -135,7 +136,7 @@ return [
 	'mta.mac' => 'MAC-Adresse',
 	'mta.type' => 'Provisionierungstyp',
 	// Configfile
-	'configfile.name' => 'Konfiguartionsdatei',
+	'configfile.name' => 'Konfigurationsdatei',
 	// PhonebookEntry
 	'phonebookentry.id' => 'ID',
 	// Phonenumber
