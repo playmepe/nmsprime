@@ -35,6 +35,7 @@ TESTS=" modules/ProvBase/Tests/ModemLifecycleTest.php"
 TESTS=" modules/ProvBase/Tests/ContractLifecycleTest.php"
 TESTS=" modules/ProvVoip/Tests/PhoneTariffLifecycleTest.php"
 TESTS=" modules/BillingBase/Tests/ProductLifecycleTest.php"
+TESTS=" modules/BillingBase/Tests/ItemLifecycleTest.php"
 
 
 touch $LOGFILE $OUTFILE

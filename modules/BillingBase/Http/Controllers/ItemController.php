@@ -3,7 +3,7 @@ namespace Modules\BillingBase\Http\Controllers;
 
 use Config;
 use Nwidart\Modules\Routing\Controller;
-use Modules\BillingBase\Entities\{BillingBase, CostCenter, Product};
+use Modules\BillingBase\Entities\{BillingBase, CostCenter, Item, Product};
 use Modules\ProvBase\Entities\Contract;
 
 class ItemController extends \BaseController {
@@ -119,10 +119,10 @@ class ItemController extends \BaseController {
 		{
 			$p = Product::find($data['product_id']);
 
-			if (in_array($p->type, ['Internet', 'Voip', 'TV']))
+			if ($p && in_array($p->type, ['Internet', 'Voip', 'TV']))
 			{
 				$c = Contract::find($data['contract_id']);
-				$tariff = $p ? $c->get_valid_tariff($p->type) : null;
+				$tariff = $c->get_valid_tariff($p->type);
 
 				if ($tariff)
 				{
